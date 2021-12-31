@@ -1,14 +1,15 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"os"
 	"net"
-	"context"
+	"os"
+
+	pb "github.com/dayta-ai/dayta-se-test3/proto"
 	"github.com/dgrijalva/jwt-go"
 	"google.golang.org/grpc"
-	pb "github.com/dayta-ai/dayta-se-test3/proto"
 )
 
 var port = ":3030"
@@ -19,17 +20,16 @@ type DecodeTokenServiceServer struct {
 	pb.UnimplementedDecodeTokenServiceServer
 }
 
-func (s *DecodeTokenServiceServer) DecodeToken(ctx context.Context, input *pb.DecodeTokenRequest) (*pb.DecodeTokenResponse, error){
+func (s *DecodeTokenServiceServer) DecodeToken(ctx context.Context, input *pb.DecodeTokenRequest) (*pb.DecodeTokenResponse, error) {
 	fmt.Printf("Received user input: %v\n", input.GetToken())
 	m, err := verifyToken(input.GetToken())
-	if err != nil{
+	if err != nil {
 		fmt.Printf("Error: %v", err)
 	}
 	fmt.Println("Title: ", m["title"].(string))
 	fmt.Println("Message: ", m["message"].(string))
 	return &pb.DecodeTokenResponse{Title: m["title"].(string), Message: m["message"].(string)}, nil
 }
-	
 
 func main() {
 	/*
@@ -38,14 +38,14 @@ func main() {
 		function verifyToken() is given below.
 	*/
 	lis, err := net.Listen("tcp", port)
-	if err != nil{
-		fmt.Println("failed to listen: %v", err)
+	if err != nil {
+		fmt.Printf("failed to listen: %v", err)
 	}
 
 	s := grpc.NewServer()
 	pb.RegisterDecodeTokenServiceServer(s, &DecodeTokenServiceServer{})
 	fmt.Println("GRPC server running on port", port)
-	if err := s.Serve(lis); err != nil{
+	if err := s.Serve(lis); err != nil {
 		fmt.Println("Failed to serve.")
 	}
 }
