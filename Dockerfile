@@ -6,7 +6,7 @@ WORKDIR /app
 
 ADD . .
 
-RUN cd server && go build .
+RUN cd client && go build .
 
 # Prod build
 
@@ -18,5 +18,6 @@ WORKDIR /app
 
 # TODO:
 #   Finish deployment docker build & serve with an entrypoint
-EXPOSE 3030
-WORKDIR [./server/server]
+COPY --from=build /app/client /app/
+EXPOSE 8080
+ENTRYPOINT [ "./client" ]
